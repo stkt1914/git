@@ -43,6 +43,16 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local model weights and caches
+/models/
+/model-cache/
+.cache/
+*.onnx
+*.gguf
+*.safetensors
+*.pt
+*.pth
+
 # Runtime data and SQLite databases
 /data/**
 !/data/.gitkeep
