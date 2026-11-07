@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "智览时政",
-  description: "海内外新闻智能聚合与多视角分析平台",
+  description: "海内外新闻智能聚合与多视角分析平台，当前展示演示数据。",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

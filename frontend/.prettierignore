@@ -3,4 +3,6 @@ node_modules
 out
 coverage
 next-env.d.ts
+test-results
+playwright-report
 
