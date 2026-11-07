@@ -1,7 +1,8 @@
 import { DEMO_EVENTS } from "@/data/demo-events";
+import { apiUrl } from "@/lib/api-base";
+import { formatEventTime } from "@/lib/format";
 import type { FeedState, NewsCategory, NewsEvent } from "@/types/news";
 
-const DEFAULT_API_BASE_URL = "http://localhost:8000/api/v1";
 const REQUEST_TIMEOUT_MS = 3500;
 
 const API_CATEGORY_MAP: Record<string, NewsCategory> = {
@@ -26,16 +27,22 @@ const API_CATEGORY_MAP: Record<string, NewsCategory> = {
   防务: "防务",
 };
 
-interface ApiEventListItem {
+interface ApiNewsItem {
   id: string;
   title: string;
   summary?: string;
+  content?: string | null;
+  original_url: string;
+  source_id: string;
+  source_name: string;
+  publisher: string;
+  language: string;
+  country_or_region: string;
+  published_at: string;
+  collected_at: string;
   category?: string;
-  first_published_at: string;
-  last_published_at?: string;
-  report_count?: number;
-  source_count?: number;
-  languages?: string[];
+  image_url?: string | null;
+  collection_method: string;
 }
 
 export function createDemoFeedState(
@@ -47,15 +54,12 @@ export function createDemoFeedState(
     syncState,
     message:
       syncState === "checking"
-        ? "正在尝试连接后端事件接口"
-        : "后端事件接口尚未提供数据，当前展示本地演示数据",
+        ? "正在尝试连接后端新闻接口"
+        : "后端新闻接口尚未提供数据，当前展示本地演示数据",
   };
 }
 
 export async function requestNewsFeed(): Promise<FeedState> {
-  const apiBaseUrl = (
-    process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL
-  ).replace(/\/$/, "");
   const controller = new AbortController();
   const timeout = window.setTimeout(
     () => controller.abort(),
@@ -63,7 +67,7 @@ export async function requestNewsFeed(): Promise<FeedState> {
   );
 
   try {
-    const response = await fetch(`${apiBaseUrl}/events?limit=24`, {
+    const response = await fetch(apiUrl("/news?limit=24"), {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -73,12 +77,12 @@ export async function requestNewsFeed(): Promise<FeedState> {
     });
 
     if (!response.ok) {
-      throw new Error(`Event API returned ${response.status}`);
+      throw new Error(`News API returned ${response.status}`);
     }
 
     const payload: unknown = await response.json();
     if (!isApiListPayload(payload)) {
-      throw new Error("Event API response shape is invalid");
+      throw new Error("News API response shape is invalid");
     }
 
     const items = payload.items
@@ -86,14 +90,14 @@ export async function requestNewsFeed(): Promise<FeedState> {
       .filter((event): event is NewsEvent => event !== null);
 
     if (items.length === 0) {
-      throw new Error("Event API returned no events");
+      throw new Error("News API returned no items");
     }
 
     return {
       items,
       mode: "live",
       syncState: "connected",
-      message: "事件列表来自后端 API",
+      message: "新闻列表来自后端 API",
     };
   } catch {
     return createDemoFeedState("fallback");
@@ -116,39 +120,52 @@ function toNewsEvent(value: unknown): NewsEvent | null {
     return null;
   }
 
-  const item = value as Partial<ApiEventListItem>;
+  const item = value as Partial<ApiNewsItem>;
   if (
     typeof item.id !== "string" ||
     typeof item.title !== "string" ||
-    typeof item.first_published_at !== "string"
+    typeof item.published_at !== "string" ||
+    typeof item.original_url !== "string" ||
+    typeof item.source_id !== "string" ||
+    typeof item.source_name !== "string"
   ) {
     return null;
   }
 
   const category = normalizeCategory(item.category);
-  const languages = Array.isArray(item.languages)
-    ? item.languages.filter(
-        (language): language is string => typeof language === "string",
-      )
-    : [];
-  const sourceCount =
-    typeof item.source_count === "number" ? item.source_count : 0;
-  const reportCount =
-    typeof item.report_count === "number" ? item.report_count : 0;
+  const language = item.language || "und";
+  const collectionMethod = item.collection_method || "rss";
 
   return {
     id: item.id,
     title: item.title,
-    summary: item.summary || "后端暂未提供事件摘要。",
+    summary: item.summary || "后端暂未提供新闻摘要。",
     category,
-    publishedAt: item.first_published_at,
-    updatedAt: item.last_published_at || item.first_published_at,
-    sources: [],
-    sourceCount,
-    reportCount,
-    languages,
-    relationLabel: `${sourceCount} 家来源 · ${reportCount} 条报道`,
-    relationSteps: [],
+    publishedAt: item.published_at,
+    updatedAt: item.published_at,
+    sources: [
+      {
+        id: item.source_id,
+        name: item.source_name,
+        shortName: item.source_name.slice(0, 1),
+        region: item.country_or_region || "未知地区",
+        language,
+        originalUrl: item.original_url,
+      },
+    ],
+    sourceCount: 1,
+    reportCount: 1,
+    languages: [language],
+    relationLabel: "单来源报道 · 待事件聚合",
+    relationSteps: [
+      {
+        id: `${item.id}-origin`,
+        at: formatEventTime(item.published_at),
+        title: "原始报道入库",
+        detail: `${item.source_name} 通过 ${collectionMethod.toUpperCase()} 提供。`,
+        kind: "origin",
+      },
+    ],
     relatedEventIds: [],
     tags: [category],
     isDemo: false,

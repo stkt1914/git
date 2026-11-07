@@ -218,3 +218,110 @@ test("desktop renders the app inside a phone-sized black canvas", async ({
     fullPage: false,
   });
 });
+
+test("real backend news replaces demo data and exposes the original link", async ({
+  page,
+}) => {
+  await page.route("**/api/backend/news?limit=24", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [
+          {
+            id: "news_live_test",
+            title: "真实采集接口测试新闻",
+            summary: "来自自动化测试的真实接口响应。",
+            content: null,
+            original_url: "https://example.com/live-news",
+            source_id: "example_source",
+            source_name: "示例媒体",
+            publisher: "示例媒体",
+            language: "zh",
+            country_or_region: "中国",
+            published_at: "2026-11-07T12:00:00Z",
+            collected_at: "2026-11-07T12:01:00Z",
+            category: "politics",
+            image_url: null,
+            collection_method: "rss",
+            content_license_status: "publisher_owned_metadata_only",
+          },
+        ],
+        next_cursor: null,
+      }),
+    });
+  });
+
+  const app = await openMobilePreview(page);
+  await expect(app.getByTestId("news-card")).toHaveCount(1);
+  await expect(app.getByTestId("news-card")).toContainText(
+    "真实采集接口测试新闻",
+  );
+  await expect(app.getByTestId("news-card")).toContainText("API");
+
+  await app.getByTestId("open-event").tap();
+  await expect(
+    app.getByTestId("event-detail").getByRole("link", { name: /原文/ }),
+  ).toHaveAttribute("href", "https://example.com/live-news");
+});
+
+test("source admin preview renders source status from the proxy API", async ({
+  page,
+}) => {
+  const source = {
+    id: "example_source",
+    name: "示例信源",
+    publisher: "示例媒体",
+    source_type: "rss",
+    homepage_url: "https://example.com",
+    language: "en",
+    country_or_region: "Global",
+    default_category: "politics",
+    collection_method: "rss",
+    enabled: true,
+    paused: false,
+    feeds: [
+      {
+        url: "https://example.com/rss.xml",
+        format: "rss",
+        category: "politics",
+      },
+    ],
+    terms_status: "rss_metadata_only_pending_review",
+    last_validation_status: "valid",
+    last_checked_at: "2026-11-07T12:00:00Z",
+    latest_item_published_at: "2026-11-07T11:00:00Z",
+    last_collected_at: "2026-11-07T12:01:00Z",
+    last_error: null,
+  };
+  await page.route(/\/api\/backend\/sources$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ items: [source], total: 1 }),
+    });
+  });
+  await page.route(/\/api\/backend\/sources\/status$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [
+          {
+            id: "example_source",
+            validation_status: "valid",
+            last_checked_at: "2026-11-07T12:00:00Z",
+            last_collected_at: "2026-11-07T12:01:00Z",
+            last_error: null,
+          },
+        ],
+      }),
+    });
+  });
+
+  await page.goto("/sources");
+  const admin = page.frameLocator('[data-testid="source-admin-preview"]');
+  await expect(admin.getByTestId("source-row")).toHaveCount(1);
+  await expect(admin.getByTestId("source-row")).toContainText("示例信源");
+  await expect(admin.getByTestId("source-row")).toContainText("可用");
+});

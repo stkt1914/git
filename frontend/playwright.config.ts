@@ -22,6 +22,7 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
     env: {
+      BACKEND_INTERNAL_URL: "http://127.0.0.1:65535/api/v1",
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

@@ -2,7 +2,7 @@
 
 “智览时政”是一个面向海内外新闻的智能聚合与多视角分析平台。项目计划提供新闻自动采集、自动分类、跨媒体同一事件识别、事件聚合、多媒体报道对照和来源追溯能力。
 
-当前仓库处于**阶段 2：前端页面与交互开发**。前端已经建立移动端优先的新闻展示系统、关注状态和事件关联详情；后端仍只提供健康检查，新闻事件接口尚未实现，因此页面默认明确显示“演示数据 · 非实时新闻”。
+当前仓库已完成**新闻信源接入与采集基础**。后端支持来源配置、真实网络验证、RSS/Atom 采集、去重入库、暂停恢复、定时/手动采集和日志；前端优先读取真实新闻，接口不可用时才回退到明确标记的演示数据。
 
 ## 技术栈
 
@@ -19,14 +19,32 @@
 - 深蓝黑背景与高透明度玻璃新闻卡片
 - “推荐 / 关注”双视图与全类型新闻下拉筛选
 - 关注状态、事件关联详情和来源追溯
-- 新闻来源、演示时间、报道数量、语言和事件关联展示
-- API 优先的数据适配层：尝试请求 `GET /api/v1/events`，失败时回退到本地演示数据
-- 后端可启动的 FastAPI 应用与 `GET /api/v1/health` 健康检查
+- 新闻来源、发布时间、报道数量和语言展示
+- API 优先的数据适配层：请求 `/api/v1/news`，失败时才回退到本地演示数据
+- 15 个首批来源的统一配置与验证结果
+- RSS/Atom 采集、HTTP 重试、失败隔离、暂停恢复和采集日志
+- SQLite `news_sources`、`news`、`collection_logs`、`source_validations` 表
+- 手机尺寸信源管理页，可查看状态并手动采集/暂停
 - FastAPI OpenAPI 文档入口
 - 统一的环境变量、忽略规则、测试与数据目录约定
 - Playwright 移动端交互测试与截图输出
 
-后端事件接口目前仍是规划项，不代表已经实现。所有本地 mock 新闻、来源和时间均明确标记为演示内容。
+事件聚合、AI 摘要、跨媒体事件匹配和完整来源关系仍属于后续阶段。未确认授权的正文和图片不会入库。
+
+## 信源采集状态
+
+当前实际验证结果见 [新闻信源与采集报告](docs/news_sources.md)：
+
+- 候选来源：15
+- 当前启用 RSS 来源：9
+- 普通网页来源：4，默认关闭自动解析
+- 已入库真实新闻：242 条
+- 已入库媒体：9
+- 最新入库新闻时间：2026-11-07T16:09:11Z
+
+所有启用来源当前只保存标题、摘要、发布时间和原文链接。来源正文与图片字段保持为空，待逐源授权核查。
+
+当前写操作接口和 `/sources` 管理页没有登录鉴权，只适合本地或受信网络使用；公网部署前必须增加访问控制。
 
 ## 页面与交互
 
@@ -34,6 +52,7 @@
 | ---------- | ------------------------------------------------ |
 | 首页 `/`   | 桌面端显示 393 × 852 手机预览框，四周保持黑色    |
 | 手机应用   | `/app` 内嵌手机视图，移动端全屏、桌面端固定尺寸  |
+| 信源管理   | `/sources` 桌面手机预览，`/app/sources` 手机页面 |
 | 顶部导航   | 仅保留居中“推荐 / 关注”切换                      |
 | 分类下拉   | 点击“推荐”展开全部内置类型并筛选新闻             |
 | 关注视图   | 展示已关注事件，支持在卡片内取消关注             |
@@ -42,7 +61,7 @@
 
 演示数据位于 `frontend/src/data/demo-events.ts`。新闻源名称、时间和事件关系均为虚构设计样本。
 
-来源数据预留 `originalUrl` 字段。接入数据库和来源追溯接口后，带有原文地址的来源会直接显示为可点击链接；当前演示来源保持不可点击并明确标记。
+真实新闻来源会显示为可点击的“原文”链接；当前演示来源保持不可点击并明确标记。
 
 桌面端根页面只提供手机尺寸预览，不单独设计桌面布局，确保电脑测试与真实手机断点一致。
 
@@ -95,6 +114,21 @@ python -m uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --por
 - 健康检查：<http://127.0.0.1:8000/api/v1/health>
 - OpenAPI 文档：<http://127.0.0.1:8000/docs>
 
+信源验证和采集命令：
+
+```powershell
+$env:PYTHONPATH = "backend"
+
+# 验证全部来源
+.\.venv\Scripts\python.exe -m app.cli validate --all
+
+# 采集全部启用来源
+.\.venv\Scripts\python.exe -m app.cli collect --all
+
+# 采集单个来源
+.\.venv\Scripts\python.exe -m app.cli collect bbc_world
+```
+
 启动前端（另开一个终端）：
 
 ```powershell
@@ -104,6 +138,9 @@ pnpm dev
 
 前端默认地址：<http://localhost:3000>
 
+- 新闻首页：<http://localhost:3000>
+- 信源管理：<http://localhost:3000/sources>
+
 ## 检查命令
 
 ```powershell
@@ -112,6 +149,7 @@ pnpm dev
 python -m pytest
 
 # 后端静态检查
+python -m ruff format --check backend tests
 python -m ruff check backend tests
 
 # 前端检查
@@ -131,7 +169,9 @@ Playwright 使用本机 Chrome，测试截图输出到 `frontend/test-results/`�
 ├── frontend/                 # Next.js + TypeScript + Tailwind CSS
 │   ├── public/
 │   ├── src/app/              # App Router 页面与全局样式
-│   ├── src/components/news/  # 首页、卡片和详情组件
+│   ├── src/app/api/backend/  # 同源后端代理，支持手机通过前端域名访问 API
+│   ├── src/components/news/  # 新闻首页组件
+│   ├── src/components/admin/ # 手机信源管理组件
 │   ├── src/data/             # 演示数据与分类视觉配置
 │   ├── src/hooks/            # 关注状态与弹层行为
 │   ├── src/lib/              # API 回退、格式化与样式工具
@@ -139,17 +179,18 @@ Playwright 使用本机 Chrome，测试截图输出到 `frontend/test-results/`�
 │   └── playwright.config.ts
 ├── backend/                  # FastAPI 服务
 │   ├── app/
-│   │   ├── api/              # API 路由（后续阶段）
-│   │   ├── core/             # 配置与公共基础设施（后续阶段）
-│   │   ├── db/               # SQLite 连接与会话（后续阶段）
-│   │   ├── models/           # 持久化模型（后续阶段）
-│   │   ├── schemas/          # Pydantic 接口模型（后续阶段）
-│   │   ├── services/         # 采集、处理、匹配与聚合服务（后续阶段）
+│   │   ├── api/              # 来源、采集、日志和新闻 API
+│   │   ├── config/           # 设置与 news_sources.yaml
+│   │   ├── db/               # SQLite 连接与会话
+│   │   ├── models/           # 新闻、来源、验证和日志模型
+│   │   ├── schemas/          # Pydantic 接口模型
+│   │   ├── services/         # 验证、采集、标准化和调度
 │   │   └── main.py           # FastAPI 应用入口
 │   └── pyproject.toml
 ├── docs/
 │   ├── api.md                # 接口规范与规划
 │   ├── architecture.md       # 系统架构与模块职责
+│   ├── news_sources.md       # 信源验证与真实采集报告
 │   └── development.md        # Git、风格与开发流程
 ├── tests/                    # 自动化测试
 │   ├── backend/
@@ -165,6 +206,7 @@ Playwright 使用本机 Chrome，测试截图输出到 `frontend/test-results/`�
 
 - [系统架构](docs/architecture.md)
 - [API 规范](docs/api.md)
+- [新闻信源与采集报告](docs/news_sources.md)
 - [开发规范](docs/development.md)
 
 ## 协作分工
@@ -176,4 +218,4 @@ Playwright 使用本机 Chrome，测试截图输出到 `frontend/test-results/`�
 
 ## 版本状态
 
-当前版本为阶段 2 前端展示验收版本。后端事件接口尚未完成，前端使用明确标记的演示数据。阶段标签应在双方完成界面和交互验收后创建，仓库中是否已有提交或标签以实际 Git 状态为准。
+当前版本为新闻信源接入与采集基础版本。事件聚合、AI 摘要和跨媒体事件识别尚未实现，阶段标签需在验收后另行创建。

@@ -1,0 +1,278 @@
+version: 1
+
+sources:
+  - id: xinhua_english
+    name: 新华网英文 RSS
+    publisher: Xinhua News Agency
+    source_type: rss
+    homepage_url: https://www.xinhuanet.com/english/rss/
+    language: en
+    country_or_region: China
+    default_category: politics
+    collection_method: rss
+    enabled: false
+    feeds:
+      - url: https://www.xinhuanet.com/english/rss/worldrss.xml
+        format: rss
+        category: politics
+      - url: https://www.xinhuanet.com/english/rss/chinarss.xml
+        format: rss
+        category: society
+      - url: https://www.xinhuanet.com/english/rss/businessrss.xml
+        format: rss
+        category: economy
+      - url: https://www.xinhuanet.com/english/rss/scirss.xml
+        format: rss
+        category: technology
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+    notes: 具体 feed 由新华网英文官方 RSS 目录核实；当前多个 feed 内容陈旧或字段不完整，默认暂停自动采集。
+
+  - id: gov_cn_english
+    name: 中国政府网英文新闻
+    publisher: The State Council of the PRC
+    source_type: webpage
+    homepage_url: https://english.www.gov.cn/news
+    language: en
+    country_or_region: China
+    default_category: politics
+    collection_method: disabled
+    enabled: false
+    terms_status: review_required
+    copyright_status: unknown
+    image_usage_status: not_used
+    notes: 普通新闻网页，未发现官方 RSS；在条款与页面结构审核前不自动解析。
+
+  - id: fmprc_english
+    name: 中国外交部英文网站
+    publisher: Ministry of Foreign Affairs of the PRC
+    source_type: webpage
+    homepage_url: https://www.fmprc.gov.cn/mfa_eng/
+    language: en
+    country_or_region: China
+    default_category: politics
+    collection_method: disabled
+    enabled: false
+    terms_status: review_required
+    copyright_status: unknown
+    image_usage_status: not_used
+    notes: 普通新闻网页，未发现官方 RSS；在条款与页面结构审核前不自动解析。
+
+  - id: stats_cn_latest
+    name: 国家统计局中文最新发布
+    publisher: National Bureau of Statistics of China
+    source_type: rss
+    homepage_url: https://www.stats.gov.cn/sj/zxfb/
+    language: zh
+    country_or_region: China
+    default_category: economy
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://www.stats.gov.cn/sj/zxfb/rss.xml
+        format: rss
+        category: economy
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: stats_en_latest
+    name: 国家统计局英文最新发布
+    publisher: National Bureau of Statistics of China
+    source_type: rss
+    homepage_url: https://www.stats.gov.cn/english/PressRelease/
+    language: en
+    country_or_region: China
+    default_category: economy
+    collection_method: rss
+    enabled: false
+    feeds:
+      - url: https://www.stats.gov.cn/english/PressRelease/rss.xml
+        format: rss
+        category: economy
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+    notes: 当前 XML 存在标签不匹配，默认暂停自动采集，等待官方 feed 修复。
+
+  - id: bbc_world
+    name: BBC World
+    publisher: BBC
+    source_type: rss
+    homepage_url: https://www.bbc.com/news/world
+    language: en
+    country_or_region: United Kingdom
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://feeds.bbci.co.uk/news/world/rss.xml
+        format: rss
+        category: politics
+    terms_url: https://www.bbc.co.uk/usingthebbc/terms/
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: guardian_world
+    name: The Guardian World
+    publisher: The Guardian
+    source_type: rss
+    homepage_url: https://www.theguardian.com/world
+    language: en
+    country_or_region: United Kingdom
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://www.theguardian.com/world/rss
+        format: rss
+        category: politics
+    terms_url: https://www.theguardian.com/help/terms-of-service
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: aljazeera_all
+    name: Al Jazeera
+    publisher: Al Jazeera Media Network
+    source_type: rss
+    homepage_url: https://www.aljazeera.com/
+    language: en
+    country_or_region: Qatar
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://www.aljazeera.com/xml/rss/all.xml
+        format: rss
+        category: politics
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: dw_english
+    name: Deutsche Welle
+    publisher: Deutsche Welle
+    source_type: rss
+    homepage_url: https://www.dw.com/en/
+    language: en
+    country_or_region: Germany
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://rss.dw.com/xml/rss-en-all
+        format: rss
+        category: politics
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: france24_english
+    name: France 24 English
+    publisher: France Médias Monde
+    source_type: rss
+    homepage_url: https://www.france24.com/en/
+    language: en
+    country_or_region: France
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://www.france24.com/en/rss
+        format: rss
+        category: politics
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: npr_news
+    name: NPR News
+    publisher: NPR
+    source_type: rss
+    homepage_url: https://www.npr.org/
+    language: en
+    country_or_region: United States
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://feeds.npr.org/1001/rss.xml
+        format: rss
+        category: politics
+    terms_url: https://www.npr.org/about-npr/179876898/terms-of-use
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: un_news_geneva
+    name: 联合国新闻（日内瓦 RSS 目录）
+    publisher: United Nations
+    source_type: rss
+    homepage_url: https://www.ungeneva.org/en/news-media/rss
+    language: en
+    country_or_region: Switzerland
+    default_category: politics
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://news.un.org/feed/subscribe/en/news/all/rss.xml
+        format: rss
+        category: politics
+    terms_url: https://www.un.org/en/about-us/terms-of-use
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+    notes: 官方日内瓦 RSS 目录指向联合国新闻总 feed。
+
+  - id: wto_latest_news
+    name: WTO Latest News
+    publisher: World Trade Organization
+    source_type: rss
+    homepage_url: https://www.wto.org/english/news_e/news_e.htm
+    language: en
+    country_or_region: Switzerland
+    default_category: economy
+    collection_method: rss
+    enabled: true
+    feeds:
+      - url: https://www.wto.org/library/rss/latest_news_e.xml
+        format: rss
+        category: economy
+    terms_url: https://www.wto.org/english/res_e/publications_e/copyright_e.htm
+    terms_status: rss_metadata_only_pending_review
+    copyright_status: publisher_owned_metadata_only
+    image_usage_status: not_used
+
+  - id: world_bank_news
+    name: World Bank News
+    publisher: World Bank Group
+    source_type: webpage
+    homepage_url: https://www.worldbank.org/en/news
+    language: en
+    country_or_region: United States
+    default_category: economy
+    collection_method: disabled
+    enabled: false
+    terms_status: review_required
+    copyright_status: unknown
+    image_usage_status: not_used
+    notes: 普通新闻网页，未发现官方 RSS；在条款与页面结构审核前不自动解析。
+
+  - id: imf_news
+    name: IMF News
+    publisher: International Monetary Fund
+    source_type: webpage
+    homepage_url: https://www.imf.org/en/News
+    language: en
+    country_or_region: United States
+    default_category: economy
+    collection_method: disabled
+    enabled: false
+    terms_status: review_required
+    copyright_status: unknown
+    image_usage_status: not_used
+    notes: 普通新闻网页，当前测试环境返回访问限制；未启用自动解析。
+

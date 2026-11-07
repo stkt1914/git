@@ -15,5 +15,18 @@ tests/
 python -m pytest
 ```
 
-前端测试将在引入测试框架后通过 `frontend/package.json` 中的脚本运行。
+后端单元测试使用本地 RSS/Atom 夹具和模拟 HTTP 响应，不依赖外部网络。真实网络验证结果记录在 `docs/news_sources.md`。
 
+真实来源验证与采集：
+
+```powershell
+$env:PYTHONPATH = "backend"
+.\.venv\Scripts\python.exe -m app.cli validate --all
+.\.venv\Scripts\python.exe -m app.cli collect --all
+```
+
+前端测试使用 Playwright，在 `frontend/` 目录运行：
+
+```powershell
+pnpm test:e2e
+```

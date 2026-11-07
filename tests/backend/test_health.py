@@ -1,6 +1,5 @@
-from fastapi.testclient import TestClient
-
 from app.main import app
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
@@ -14,4 +13,3 @@ def test_health_check() -> None:
         "service": "zhilan-api",
         "version": "0.1.0",
     }
-
