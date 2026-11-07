@@ -8,7 +8,11 @@ export function useDialogDismiss(open: boolean, onClose: () => void) {
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    const scrollRoot = document.querySelector<HTMLElement>(
+      "[data-mobile-app-shell]",
+    );
+    const previousRootOverflow = scrollRoot?.style.overflow;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -17,10 +21,16 @@ export function useDialogDismiss(open: boolean, onClose: () => void) {
     }
 
     document.body.style.overflow = "hidden";
+    if (scrollRoot) {
+      scrollRoot.style.overflow = "hidden";
+    }
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      if (scrollRoot) {
+        scrollRoot.style.overflow = previousRootOverflow ?? "";
+      }
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose, open]);

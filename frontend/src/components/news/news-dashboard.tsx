@@ -90,7 +90,7 @@ export function NewsDashboard() {
       : `DAILY SIGNAL / ${selectedCategory === "全部" ? "全类型" : selectedCategory}`;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-full">
       <div className="sticky top-0 z-40 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="mx-auto w-full max-w-[1120px]">
           <TopBar

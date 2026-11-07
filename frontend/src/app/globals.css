@@ -12,38 +12,17 @@
 
 html {
   min-height: 100%;
-  background: var(--page-bg);
+  background: #000000;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background:
-    linear-gradient(130deg, rgba(39, 119, 91, 0.22), transparent 34%),
-    linear-gradient(310deg, rgba(195, 132, 45, 0.11), transparent 38%),
-    linear-gradient(24deg, rgba(65, 123, 149, 0.12), transparent 44%),
-    var(--page-bg);
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #000000;
   color: var(--page-text);
   font-family:
     "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", sans-serif;
-}
-
-body::before {
-  position: fixed;
-  z-index: 0;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
-  background-size: 40px 40px;
-  content: "";
-  mask-image: linear-gradient(to bottom, black, transparent 82%);
-  pointer-events: none;
-}
-
-body > * {
-  position: relative;
-  z-index: 1;
 }
 
 button,
@@ -78,6 +57,63 @@ button:disabled {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   background-clip: padding-box;
+}
+
+.device-canvas {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background: #000000;
+}
+
+.device-frame {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--page-bg);
+}
+
+.device-frame__screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--page-bg);
+}
+
+.mobile-app-shell {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  background:
+    linear-gradient(130deg, rgba(39, 119, 91, 0.22), transparent 34%),
+    linear-gradient(310deg, rgba(195, 132, 45, 0.11), transparent 38%),
+    linear-gradient(24deg, rgba(65, 123, 149, 0.12), transparent 44%),
+    var(--page-bg);
+}
+
+.mobile-app-shell::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+  background-size: 40px 40px;
+  content: "";
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+  pointer-events: none;
+}
+
+.mobile-app-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .liquid-panel {
@@ -189,6 +225,18 @@ button:disabled {
 @supports not (backdrop-filter: blur(1px)) {
   .liquid-panel {
     background: rgba(13, 31, 26, 0.94);
+  }
+}
+
+@media (min-width: 600px) {
+  .device-frame {
+    width: 393px;
+    height: min(852px, calc(100dvh - 32px));
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 38px;
+    box-shadow:
+      0 0 0 8px rgba(255, 255, 255, 0.025),
+      0 32px 100px rgba(0, 0, 0, 0.72);
   }
 }
 
