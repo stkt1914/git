@@ -35,6 +35,7 @@ out/
 .turbo/
 .vercel/
 coverage/
+next-env.d.ts
 *.tsbuildinfo
 .eslintcache
 npm-debug.log*
