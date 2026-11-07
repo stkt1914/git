@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 async function openMobilePreview(page: Page) {
   await page.goto("/");
   const app = page.frameLocator('[data-testid="mobile-preview"]');
-  await expect(app.getByTestId("demo-notice")).toContainText("演示数据");
+  await expect(app.getByTestId("news-card").first()).toBeVisible();
   return app;
 }
 
@@ -20,6 +20,9 @@ test("mobile first screen shows a dense demonstration feed", async ({
   const cards = app.getByTestId("news-card");
   await expect(cards).toHaveCount(6);
   await expect(cards.first()).toContainText("演示");
+  await expect(app.getByTestId("data-mode-label")).toContainText("演示样本日");
+  await expect(app.locator("header button")).toHaveCount(2);
+  await expect(app.getByTestId("open-search")).toHaveCount(0);
 
   const cardMetrics = await cards.evaluateAll((nodes) =>
     nodes.map((node) => {
@@ -60,7 +63,6 @@ test("mobile first screen shows a dense demonstration feed", async ({
       Math.abs(tabBox.x + tabBox.width / 2 - layoutMetrics.clientWidth / 2),
     ).toBeLessThan(2);
   }
-  await expect(app.getByText("情报概览")).toBeHidden();
 
   await page.screenshot({
     path: "test-results/mobile-home.png",
@@ -111,21 +113,9 @@ test("following tab shows the demonstration watchlist and bookmark state", async
   });
 });
 
-test("search opens a result and event relationship detail", async ({
-  page,
-}) => {
+test("news card opens event relationship detail", async ({ page }) => {
   const app = await openMobilePreview(page);
-  await app.getByTestId("open-search").tap();
-  await expect(app.getByTestId("search-sheet")).toBeVisible();
-
-  await app.getByTestId("search-sheet").getByRole("searchbox").fill("芯片");
-
-  await expect(app.getByTestId("search-result")).toHaveCount(1);
-  await page.screenshot({
-    path: "test-results/mobile-search.png",
-    fullPage: false,
-  });
-  await app.getByTestId("search-result").first().tap();
+  await app.getByTestId("open-event").first().tap();
 
   await expect(app.getByTestId("event-detail")).toBeVisible();
   await expect(app.getByTestId("event-detail")).toContainText("事件关联");
@@ -137,6 +127,31 @@ test("search opens a result and event relationship detail", async ({
   });
 });
 
+test("narrow phone keeps every card inside the viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  const app = await openMobilePreview(page);
+  const cards = app.getByTestId("news-card");
+
+  const layoutMetrics = await app.locator("body").evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(layoutMetrics.scrollWidth).toBeLessThanOrEqual(
+    layoutMetrics.clientWidth + 1,
+  );
+
+  const overflowingCards = await cards.evaluateAll(
+    (nodes) =>
+      nodes.filter((node) => node.scrollWidth > node.clientWidth + 1).length,
+  );
+  expect(overflowingCards).toBe(0);
+
+  await page.screenshot({
+    path: "test-results/mobile-narrow-320.png",
+    fullPage: false,
+  });
+});
+
 test("desktop renders the app inside a phone-sized black canvas", async ({
   page,
 }) => {
@@ -144,7 +159,8 @@ test("desktop renders the app inside a phone-sized black canvas", async ({
   await page.goto("/");
   await page
     .frameLocator('[data-testid="mobile-preview"]')
-    .getByTestId("demo-notice")
+    .getByTestId("news-card")
+    .first()
     .waitFor();
 
   const frameBox = await page.getByTestId("mobile-frame").boundingBox();

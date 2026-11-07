@@ -10,11 +10,8 @@ import { formatEventDate } from "@/lib/format";
 import type { FeedState, FeedTab, NewsCategoryFilter } from "@/types/news";
 
 import { CategoryPanel } from "./category-panel";
-import { DataNotice } from "./data-notice";
 import { EventDetailSheet } from "./event-detail-sheet";
-import { InsightRail } from "./insight-rail";
 import { NewsFeed } from "./news-feed";
-import { SearchSheet } from "./search-sheet";
 import { TopBar } from "./top-bar";
 
 export function NewsDashboard() {
@@ -23,7 +20,6 @@ export function NewsDashboard() {
   const [selectedCategory, setSelectedCategory] =
     useState<NewsCategoryFilter>("全部");
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const { followedIds, toggleFollow } = useFollowedEvents();
 
@@ -60,7 +56,6 @@ export function NewsDashboard() {
     : "今日";
 
   const closeDetail = useCallback(() => setSelectedEventId(null), []);
-  const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   function handleTabChange(tab: FeedTab) {
     if (tab === "recommended") {
@@ -78,11 +73,6 @@ export function NewsDashboard() {
     setCategoryOpen(false);
   }
 
-  function handleSearchResult(eventId: string) {
-    setSearchOpen(false);
-    setSelectedEventId(eventId);
-  }
-
   const heading = activeTab === "following" ? "我的关注" : "今日热点";
   const kicker =
     activeTab === "following"
@@ -91,12 +81,11 @@ export function NewsDashboard() {
 
   return (
     <div className="min-h-full">
-      <div className="sticky top-0 z-40 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div className="mx-auto w-full max-w-[1120px]">
+      <div className="sticky top-0 z-40 px-2.5 pt-[max(0.65rem,env(safe-area-inset-top))]">
+        <div className="mx-auto w-full max-w-[376px]">
           <TopBar
             activeTab={activeTab}
             categoryOpen={categoryOpen}
-            onSearchOpen={() => setSearchOpen(true)}
             onTabChange={handleTabChange}
           />
           <CategoryPanel
@@ -107,19 +96,14 @@ export function NewsDashboard() {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1120px] px-3 pt-3 pb-12 sm:px-5">
-        <DataNotice
-          message={feed.message}
-          mode={feed.mode}
-          syncState={feed.syncState}
-        />
-
-        <div className="mt-3 grid gap-6 lg:grid-cols-[minmax(0,720px)_320px] lg:items-start">
+      <main className="mx-auto w-full max-w-[376px] px-2.5 pt-1.5 pb-10">
+        <div>
           <section aria-labelledby="feed-heading">
-            <div className="flex items-end justify-between px-1 pt-2 pb-3">
+            <div className="flex items-start justify-between gap-3 px-1 pt-2 pb-3">
               <div>
                 <p className="text-[9px] font-medium tracking-[0.18em] text-white/30 uppercase">
-                  {kicker}
+                  {kicker} ·{" "}
+                  {feed.mode === "demo" ? "演示数据 · 非实时" : "API 数据"}
                 </p>
                 <h1
                   id="feed-heading"
@@ -128,7 +112,10 @@ export function NewsDashboard() {
                   {heading}
                 </h1>
               </div>
-              <div className="pb-0.5 text-right">
+              <div
+                className="shrink-0 pb-0.5 text-right"
+                data-testid="data-mode-label"
+              >
                 <p className="text-[10px] text-white/40">
                   {feed.mode === "demo" ? "演示样本日" : "最新更新"} ·{" "}
                   {dateLabel}
@@ -149,18 +136,8 @@ export function NewsDashboard() {
               tab={activeTab}
             />
           </section>
-
-          <InsightRail feed={feed} />
         </div>
       </main>
-
-      {searchOpen && (
-        <SearchSheet
-          events={feed.items}
-          onClose={closeSearch}
-          onSelectEvent={handleSearchResult}
-        />
-      )}
 
       {selectedEvent && (
         <EventDetailSheet

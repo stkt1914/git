@@ -34,7 +34,7 @@ export function SourceStack({ sources, sourceCount }: SourceStackProps) {
           </span>
         ))}
       </div>
-      <span className="truncate text-[11px] font-medium text-white/58">
+      <span className="text-[10px] leading-4 font-medium text-white/58">
         {sources.length > 0
           ? `${sources[0].name}${sources.length > 1 ? ` 等 ${sourceCount} 家` : ""}`
           : `${sourceCount} 家来源`}

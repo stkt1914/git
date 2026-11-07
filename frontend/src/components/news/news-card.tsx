@@ -51,7 +51,7 @@ export function NewsCard({
         style={{ backgroundColor: visual.accent, opacity: 0.8 }}
       />
 
-      <div className="flex gap-2.5 p-4 pl-[18px]">
+      <div className="flex gap-2 p-3.5 pl-4">
         <button
           type="button"
           aria-label={`查看事件：${event.title}`}
@@ -59,7 +59,7 @@ export function NewsCard({
           data-testid="open-event"
           onClick={() => onOpen(event.id)}
         >
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span
               className="rounded-full border px-2 py-0.5 text-[9px] font-semibold"
               style={{
@@ -80,20 +80,20 @@ export function NewsCard({
             </span>
           </div>
 
-          <h2 className="line-clamp-2 text-[17px] leading-[1.42] font-semibold text-white/94">
+          <h2 className="text-[16px] leading-[1.45] font-semibold text-white/94">
             {event.title}
           </h2>
-          <p className="mt-1.5 line-clamp-2 text-[11px] leading-[1.65] text-white/48">
+          <p className="mt-1.5 text-[10.5px] leading-[1.65] text-white/48">
             {event.summary}
           </p>
 
-          <div className="mt-2.5 flex min-w-0 items-center gap-2.5">
+          <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <SourceStack
               sources={event.sources}
               sourceCount={event.sourceCount}
             />
             <span className="size-0.5 shrink-0 rounded-full bg-white/24" />
-            <span className="truncate text-[10px] text-white/38">
+            <span className="text-[10px] leading-4 text-white/38">
               {formatLanguageList(event.languages)} · {event.reportCount} 条报道
             </span>
           </div>
@@ -128,13 +128,13 @@ export function NewsCard({
 
       <button
         type="button"
-        className="flex w-full items-center gap-2 border-t border-white/8 px-4 py-2 text-left text-[10px] text-white/44 transition hover:bg-white/[0.035] hover:text-white/66"
+        className="flex w-full items-start gap-2 border-t border-white/8 px-4 py-2 text-left text-[10px] leading-4 text-white/44 transition hover:bg-white/[0.035] hover:text-white/66"
         onClick={() => onOpen(event.id)}
         tabIndex={-1}
       >
         <Network aria-hidden="true" className="size-3.5 text-white/34" />
-        <span className="min-w-0 flex-1 truncate">{event.relationLabel}</span>
-        <span className="text-white/28">事件关联</span>
+        <span className="min-w-0 flex-1">{event.relationLabel}</span>
+        <span className="shrink-0 text-white/28">事件关联</span>
         <ChevronRight aria-hidden="true" className="size-3.5" />
       </button>
     </article>

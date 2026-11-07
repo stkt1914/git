@@ -16,7 +16,7 @@ export function EventVisual({ category }: EventVisualProps) {
   return (
     <div
       aria-hidden="true"
-      className="relative grid size-[58px] shrink-0 place-items-center overflow-hidden rounded-[18px] border border-white/14 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
+      className="relative grid size-[52px] shrink-0 place-items-center overflow-hidden rounded-[16px] border border-white/14 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
       style={
         {
           "--event-glow": visual.glow,
