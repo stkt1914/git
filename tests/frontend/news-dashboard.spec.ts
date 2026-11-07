@@ -127,6 +127,36 @@ test("news card opens event relationship detail", async ({ page }) => {
   });
 });
 
+test("event detail can scroll on a narrow mobile screen", async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 640 });
+  const app = await openMobilePreview(page);
+  await app.getByTestId("open-event").first().tap();
+
+  const scrollArea = app.getByTestId("event-detail-scroll");
+  await expect(scrollArea).toBeVisible();
+  const scrollMetrics = await scrollArea.evaluate((node) => ({
+    overflowY: window.getComputedStyle(node).overflowY,
+    clientHeight: node.clientHeight,
+    scrollHeight: node.scrollHeight,
+  }));
+
+  expect(scrollMetrics.overflowY).toBe("auto");
+  expect(scrollMetrics.scrollHeight).toBeGreaterThan(
+    scrollMetrics.clientHeight,
+  );
+
+  const scrolledTo = await scrollArea.evaluate((node) => {
+    node.scrollTop = node.scrollHeight;
+    return node.scrollTop;
+  });
+  expect(scrolledTo).toBeGreaterThan(0);
+
+  await page.screenshot({
+    path: "test-results/mobile-detail-scroll.png",
+    fullPage: false,
+  });
+});
+
 test("narrow phone keeps every card inside the viewport", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   const app = await openMobilePreview(page);

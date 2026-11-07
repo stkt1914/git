@@ -20,6 +20,7 @@ export interface NewsSource {
   shortName: string;
   region: string;
   language: string;
+  originalUrl?: string | null;
 }
 
 export type RelationStepKind =

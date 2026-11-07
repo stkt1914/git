@@ -1,11 +1,18 @@
 "use client";
 
-import { ChevronRight, Languages, Network, Radio, X } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Languages,
+  Network,
+  Radio,
+  X,
+} from "lucide-react";
 
 import { getCategoryVisual } from "@/data/category-config";
 import { useDialogDismiss } from "@/hooks/use-dialog-dismiss";
 import { formatEventTime, formatLanguageList } from "@/lib/format";
-import type { NewsEvent } from "@/types/news";
+import type { NewsEvent, NewsSource } from "@/types/news";
 
 import { SourceStack } from "./source-stack";
 
@@ -33,7 +40,7 @@ export function EventDetailSheet({
     <div
       aria-label={`事件详情：${event.title}`}
       aria-modal="true"
-      className="animate-overlay-in fixed inset-0 z-50 bg-[#020a08]/58 backdrop-blur-md"
+      className="animate-overlay-in fixed inset-0 z-50 flex items-stretch bg-[#01040c]/68 p-2 pt-[max(4rem,calc(env(safe-area-inset-top)+0.75rem))] backdrop-blur-md sm:justify-end sm:p-4"
       data-testid="event-detail"
       role="dialog"
     >
@@ -45,7 +52,10 @@ export function EventDetailSheet({
         tabIndex={-1}
       />
 
-      <article className="liquid-panel animate-sheet-in absolute inset-x-2 top-[max(4rem,calc(env(safe-area-inset-top)+0.75rem))] bottom-2 overflow-y-auto overscroll-contain rounded-[28px] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:inset-x-auto sm:top-4 sm:right-4 sm:bottom-4 sm:w-[480px] sm:p-6">
+      <article
+        className="event-detail-scroll liquid-panel animate-sheet-in relative h-full max-h-full w-full rounded-[28px] p-5 pb-8 shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:ml-auto sm:w-[480px] sm:p-6 sm:pb-9"
+        data-testid="event-detail-scroll"
+      >
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
@@ -143,28 +153,11 @@ export function EventDetailSheet({
         {event.sources.length > 0 ? (
           <div className="mt-3 space-y-2">
             {event.sources.map((source) => (
-              <div
-                key={source.id}
-                className="flex items-center gap-3 rounded-[16px] border border-white/7 bg-white/[0.025] px-3 py-2.5"
-              >
-                <span className="grid size-8 shrink-0 place-items-center rounded-[11px] border border-white/10 bg-white/[0.055] text-[11px] font-semibold text-white/70">
-                  {source.shortName}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-white/68">
-                    {source.name}
-                  </p>
-                  <p className="mt-0.5 text-[9px] text-white/28">
-                    {source.region} · {source.language}
-                  </p>
-                </div>
-                <span className="rounded-full border border-amber-200/12 bg-amber-200/6 px-2 py-0.5 text-[8px] text-amber-100/50">
-                  演示
-                </span>
-              </div>
+              <SourceTraceItem key={source.id} source={source} />
             ))}
             <p className="px-1 pt-1 text-[9px] leading-4 text-white/24">
-              演示数据不包含可访问的原始报道链接，接入真实数据后将在此显示来源证据链。
+              演示数据不包含可访问的原始报道链接。接入真实数据后，带有原文 URL
+              的来源会显示为可点击链接。
             </p>
           </div>
         ) : (
@@ -210,6 +203,50 @@ export function EventDetailSheet({
           </p>
         )}
       </article>
+    </div>
+  );
+}
+
+function SourceTraceItem({ source }: { source: NewsSource }) {
+  const content = (
+    <>
+      <span className="grid size-8 shrink-0 place-items-center rounded-[11px] border border-white/10 bg-white/[0.055] text-[11px] font-semibold text-white/70">
+        {source.shortName}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-medium text-white/68">
+          {source.name}
+        </p>
+        <p className="mt-0.5 text-[9px] text-white/28">
+          {source.region} · {source.language}
+        </p>
+      </div>
+    </>
+  );
+
+  if (source.originalUrl) {
+    return (
+      <a
+        className="flex items-center gap-3 rounded-[16px] border border-sky-200/12 bg-sky-200/[0.035] px-3 py-2.5 transition hover:border-sky-200/22 hover:bg-sky-200/[0.065]"
+        href={source.originalUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
+        {content}
+        <span className="flex shrink-0 items-center gap-1 rounded-full border border-sky-200/14 bg-sky-200/8 px-2 py-1 text-[8px] text-sky-100/65">
+          原文
+          <ExternalLink aria-hidden="true" className="size-2.5" />
+        </span>
+      </a>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-[16px] border border-white/7 bg-white/[0.025] px-3 py-2.5">
+      {content}
+      <span className="shrink-0 rounded-full border border-amber-200/12 bg-amber-200/6 px-2 py-0.5 text-[8px] text-amber-100/50">
+        演示
+      </span>
     </div>
   );
 }
