@@ -156,8 +156,9 @@ export function EventDetailSheet({
               <SourceTraceItem key={source.id} source={source} />
             ))}
             <p className="px-1 pt-1 text-[9px] leading-4 text-white/24">
-              演示数据不包含可访问的原始报道链接。接入真实数据后，带有原文 URL
-              的来源会显示为可点击链接。
+              {event.isDemo
+                ? "演示数据不包含可访问的原始报道链接。"
+                : "“原文”链接由 RSS 条目提供；平台当前只展示标题、摘要、发布时间和来源链接。"}
             </p>
           </div>
         ) : (
