@@ -313,10 +313,26 @@ def add_plan_table(doc: Document) -> None:
 
 def add_resource_table(doc: Document) -> None:
     rows = [
-        ("公网 Linux 服务器", "4 核 CPU、8 GB 内存、100 GB 磁盘；用于前后端与数据库部署", "1 台，至少 1 个月"),
-        ("域名和 HTTPS", "手机扫码访问、反向代理与接口同源访问", "1 套，至少 1 个月"),
-        ("中国大陆网络测试", "从真实移动网络复验海外 RSS 可达性与超时表现", "1 天测试窗口"),
-        ("版权与再分发指导", "确认 RSS 标题、摘要和链接的公开展示范围", "1 次专项答疑"),
+        (
+            "公网演示环境与域名",
+            "提供 2 vCPU、4 GB 内存、40 GB 磁盘的云主机或等价托管环境，含固定域名和 HTTPS，支持微信扫码直接访问",
+            "1 套，比赛验收全程",
+        ),
+        (
+            "部署与运维协助",
+            "协助使用 Docker Compose 上线，配置自动重启、日志和数据库备份；团队负责提供代码和配置",
+            "首次 2 小时，演示前复检 1 次",
+        ),
+        (
+            "国内手机网络复验",
+            "通过微信、移动、联通和电信网络测试二维码、页面加载和新闻接口，并按结果调整",
+            "1 天测试窗口",
+        ),
+        (
+            "版权与展示范围指导",
+            "明确 RSS 标题、摘要、来源链接的公开展示边界，避免超出授权范围",
+            "1 次书面答复",
+        ),
     ]
     table = doc.add_table(rows=1, cols=3)
     table.style = "Table Grid"
@@ -505,11 +521,21 @@ def build_document() -> None:
     add_plan_table(doc)
 
     doc.add_page_break()
-    doc.add_heading("六、需求或疑问", level=1)
+    doc.add_heading("六、需求与帮助", level=1)
     resource_intro = doc.add_paragraph()
-    resource_run = resource_intro.add_run("为完成公网演示和真实网络复验，希望赛事组协助协调以下资源。")
+    resource_run = resource_intro.add_run(
+        "比赛要求任意用户扫描二维码或输入网址后即可使用。团队缺少服务器运维经验，当前只能用本地电脑和临时隧道进行开发演示，"
+        "无法保证验收期间持续在线。希望赛事组或学校提供一个可直接部署的公网环境，并协助完成固定域名、HTTPS 和首次上线，"
+        "使团队无需自行购买和长期维护底层服务器。"
+    )
     set_run_font(resource_run, BODY_FONT, size=10.5)
     add_resource_table(doc)
+    resource_note = doc.add_paragraph()
+    resource_note_run = resource_note.add_run(
+        "临时隧道链接可立即用于开发验收，但不作为正式比赛入口；正式提交前将替换为固定域名和 HTTPS 二维码。"
+        "若无法提供云主机，希望协助开通受管部署平台，并确认 SQLite 数据持久化方案。"
+    )
+    set_run_font(resource_note_run, BODY_FONT, size=8.5)
 
     doc.add_heading("七、成员分工", level=1)
     add_roles_table(doc)
