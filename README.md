@@ -141,6 +141,18 @@ pnpm dev
 - 新闻首页：<http://localhost:3000>
 - 信源管理：<http://localhost:3000/sources>
 
+公网手机预览必须使用生产构建。`next dev` 依赖 HMR WebSocket，经 HTTPS
+隧道转发时可能被拒绝，页面会只显示静态 HTML 而无法点击：
+
+```powershell
+Set-Location frontend
+pnpm preview
+```
+
+生产预览地址为 <http://127.0.0.1:3001>。将 HTTPS 隧道指向该端口后再生成
+二维码；验收完成后应停止命令行进程。临时隧道地址仅用于开发验收，不等同于
+正式长期部署。
+
 ## 检查命令
 
 ```powershell
