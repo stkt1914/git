@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,7 +16,9 @@ from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_DIR = ROOT / "docs" / "assets" / "midterm"
-OUTPUT_PATH = ROOT / "docs" / "智览时政_中期说明.docx"
+OUTPUT_PATH = Path(
+    os.environ.get("ZHILAN_REPORT_OUTPUT", ROOT / "docs" / "智览时政_中期说明.docx")
+)
 DATABASE_PATH = ROOT / "data" / "zhilan.db"
 
 BODY_FONT = "宋体"
@@ -314,19 +317,24 @@ def add_plan_table(doc: Document) -> None:
 def add_resource_table(doc: Document) -> None:
     rows = [
         (
-            "公网演示环境与域名",
-            "提供 2 vCPU、4 GB 内存、40 GB 磁盘的云主机或等价托管环境，含固定域名和 HTTPS，支持微信扫码直接访问",
-            "1 套，比赛验收全程",
+            "首次部署协助",
+            "团队自行采购云服务器并提供代码，协助完成 Docker Compose、反向代理、自动重启和首次上线",
+            "远程 1 次，约 2 小时",
         ),
         (
-            "部署与运维协助",
-            "协助使用 Docker Compose 上线，配置自动重启、日志和数据库备份；团队负责提供代码和配置",
-            "首次 2 小时，演示前复检 1 次",
+            "域名、HTTPS 与备案指导",
+            "指导域名实名认证、ICP 备案、DNS 解析和 TLS 证书配置，使用固定域名生成正式二维码",
+            "1 次流程说明；演示前复检",
         ),
         (
             "国内手机网络复验",
             "通过微信、移动、联通和电信网络测试二维码、页面加载和新闻接口，并按结果调整",
             "1 天测试窗口",
+        ),
+        (
+            "管理页鉴权指导",
+            "确认比赛展示环境下信源管理写操作的访问控制、审计和最小权限要求",
+            "1 次书面答复",
         ),
         (
             "版权与展示范围指导",
@@ -337,7 +345,7 @@ def add_resource_table(doc: Document) -> None:
     table = doc.add_table(rows=1, cols=3)
     table.style = "Table Grid"
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ("资源", "用途", "数量 / 时间")
+    headers = ("帮助事项", "具体内容", "建议方式")
     for index, (cell, text) in enumerate(zip(table.rows[0].cells, headers, strict=True)):
         set_cell_width(cell, (4.0, 9.2, 3.5)[index])
         set_cell_text(cell, text, bold=True, size=9.5, align=WD_ALIGN_PARAGRAPH.CENTER)
@@ -350,6 +358,83 @@ def add_resource_table(doc: Document) -> None:
         set_cell_text(cells[0], resource, size=9, bold=True)
         set_cell_text(cells[1], purpose, size=9)
         set_cell_text(cells[2], amount, size=9)
+    keep_rows_together(table, repeat_header=True)
+
+
+def add_server_spec_table(doc: Document) -> None:
+    rows = [
+        (
+            "CPU",
+            "2 vCPU",
+            "运行 FastAPI、Next.js、定时采集和轻量多语言向量模型；当前无需 GPU。",
+        ),
+        (
+            "内存",
+            "4 GB",
+            "比最低可用方案更稳定，可同时承载应用服务、前端构建和少量并发。",
+        ),
+        (
+            "系统盘",
+            "40 GB SSD（建议 60 GB）",
+            "容纳系统、依赖、日志和 SQLite；SSD 可缩短构建与查询时间。",
+        ),
+        (
+            "公网带宽",
+            "5 Mbps 峰值",
+            "以文字、标题和摘要为主，满足手机页面加载与二维码访问。",
+        ),
+        (
+            "公网地址",
+            "1 个固定公网 IPv4",
+            "固定域名解析、HTTPS 证书和正式二维码入口需要稳定地址。",
+        ),
+        (
+            "操作系统",
+            "Ubuntu 22.04 LTS 或 24.04 LTS",
+            "长期维护、部署资料完整，适合 Docker Compose 单机部署。",
+        ),
+        (
+            "域名与证书",
+            "1 个域名；TLS 证书",
+            "完成域名实名认证及 ICP 备案；正式入口使用 HTTPS。",
+        ),
+        (
+            "端口与安全",
+            "开放 80/443；SSH 22 限制来源",
+            "启用防火墙、密钥登录和管理页鉴权，不使用弱口令。",
+        ),
+        (
+            "部署与数据",
+            "Docker Compose；SQLite",
+            "同机运行前端、后端、反向代理和采集任务，不另购数据库实例。",
+        ),
+        (
+            "备份与地域",
+            "每日快照保留 7 天；国内访问优先",
+            "覆盖 SQLite、配置和日志；采购前实测候选 RSS 与手机网络可达性。",
+        ),
+        (
+            "GPU 与大模型",
+            "不需要",
+            "当前不部署大语言模型；跨媒体语义匹配采用 CPU 可运行的轻量向量模型。",
+        ),
+    ]
+    table = doc.add_table(rows=1, cols=3)
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    headers = ("采购项", "建议规格", "用途与说明")
+    widths = (3.0, 5.6, 8.0)
+    for index, (cell, text) in enumerate(zip(table.rows[0].cells, headers, strict=True)):
+        set_cell_width(cell, widths[index])
+        set_cell_text(cell, text, bold=True, size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+        set_cell_shading(cell, "F2F2F2")
+    for item, spec, purpose in rows:
+        cells = table.add_row().cells
+        for width, cell in zip(widths, cells, strict=True):
+            set_cell_width(cell, width)
+        set_cell_text(cells[0], item, size=8.5, bold=True)
+        set_cell_text(cells[1], spec, size=8.5)
+        set_cell_text(cells[2], purpose, size=8.5)
     keep_rows_together(table, repeat_header=True)
 
 
@@ -504,8 +589,13 @@ def build_document() -> None:
     set_run_font(command_run, "Consolas", size=8.5)
 
     doc.add_heading("四、存在的问题与困难", level=1)
+    news_summary = read_database_summary()["news"]
+    news_context = (
+        "当前入库新闻" if news_summary == "未读取" else f"当前 {news_summary}真实新闻"
+    )
     problems = [
-        "跨媒体同一事件识别尚未实现。当前 522 条真实新闻仍以单来源报道展示，事件聚类和置信度评估仍是下一阶段的核心技术难点。",
+        f"跨媒体同一事件识别尚未实现。{news_context}仍以单来源报道展示，"
+        "事件聚类和置信度评估仍是下一阶段的核心技术难点。",
         "信源许可和再分发范围尚未逐个完成审核。为规避版权风险，系统只保存 RSS 标题、摘要、发布时间和原文链接，暂不抓取正文和图片。",
         "海外 RSS 在中国大陆正式部署网络的可用性仍需复验。IMF 当前返回 403，新华网 feed 内容过期，国家统计局英文 feed 的 XML 结构不合格。",
         "公网部署、登录鉴权和操作审计尚未完成。信源管理页包含采集、暂停等写操作，目前只适合在本地或受信网络中运行。",
@@ -521,19 +611,36 @@ def build_document() -> None:
     add_plan_table(doc)
 
     doc.add_page_break()
-    doc.add_heading("六、需求与帮助", level=1)
+    doc.add_heading("六、云服务器采购与需求帮助", level=1)
     resource_intro = doc.add_paragraph()
     resource_run = resource_intro.add_run(
-        "比赛要求任意用户扫描二维码或输入网址后即可使用。团队缺少服务器运维经验，当前只能用本地电脑和临时隧道进行开发演示，"
-        "无法保证验收期间持续在线。希望赛事组或学校提供一个可直接部署的公网环境，并协助完成固定域名、HTTPS 和首次上线，"
-        "使团队无需自行购买和长期维护底层服务器。"
+        "比赛要求任意用户扫描二维码或输入网址后即可使用。团队计划自行采购一台中等配置云服务器，作为正式演示入口，"
+        "不再依赖本地电脑或临时隧道。当前负载包括新闻采集、FastAPI、Next.js、SQLite 和轻量多语言向量匹配，"
+        "不需要 GPU 或独立数据库服务器。"
     )
     set_run_font(resource_run, BODY_FONT, size=10.5)
+
+    doc.add_heading("（一）中等配置云服务器采购清单", level=2)
+    spec_intro = doc.add_paragraph()
+    spec_intro_run = spec_intro.add_run(
+        "下列配置用于比赛验收期的一台云主机，建议购买 3 至 6 个月。采购时以云厂商实际产品名称为准，"
+        "关键是保证 CPU、内存、SSD、公网 IPv4、带宽和快照能力均包含在内。"
+    )
+    set_run_font(spec_intro_run, BODY_FONT, size=9.5)
+    add_server_spec_table(doc)
+    spec_note = doc.add_paragraph()
+    spec_note_run = spec_note.add_run(
+        "与最低可用方案相比，4 GB 内存可以降低前端构建、定时采集和轻量向量计算同时运行时的内存压力。"
+        "如监控显示 CPU 或内存长期超过 70%，再考虑升级到 4 vCPU、8 GB；无需为当前阶段预购更高配置。"
+    )
+    set_run_font(spec_note_run, BODY_FONT, size=8.5)
+
+    doc.add_heading("（二）需要协助的事项", level=2)
     add_resource_table(doc)
     resource_note = doc.add_paragraph()
     resource_note_run = resource_note.add_run(
         "临时隧道链接可立即用于开发验收，但不作为正式比赛入口；正式提交前将替换为固定域名和 HTTPS 二维码。"
-        "若无法提供云主机，希望协助开通受管部署平台，并确认 SQLite 数据持久化方案。"
+        "服务器由团队自行采购和付费，希望获得首次部署、域名备案、HTTPS、备份恢复和跨网络复验方面的指导。"
     )
     set_run_font(resource_note_run, BODY_FONT, size=8.5)
 
